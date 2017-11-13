@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "258027945522",
+    "firebase_url": "https://okey-a55c2.firebaseio.com",
+    "project_id": "okey-a55c2",
+    "storage_bucket": "okey-a55c2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258027945522:android:58164a59b10e0368",
+        "android_client_info": {
+          "package_name": "com.example.android.okey"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258027945522-hmg4l6g7iiuvkpkhaog49mca4qbqd2fc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.android.okey",
+            "certificate_hash": "061d4a1aa0fa642320d70b11987a68f0644ad80c"
+          }
+        },
+        {
+          "client_id": "258027945522-mirpt00rt8vc2j2sfajt2i7rjhht9a1p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgEBtnHvoXxnIGWMn48_gxsTs7HrJqv9U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258027945522-mirpt00rt8vc2j2sfajt2i7rjhht9a1p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
