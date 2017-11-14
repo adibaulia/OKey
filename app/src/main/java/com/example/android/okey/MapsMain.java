@@ -22,6 +22,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -33,11 +41,16 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
+    DatabaseReference database;
+    List <TukangKunci> tukangKunci;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_main);
+        database = FirebaseDatabase.getInstance().getReference();
+        tukangKunci = new ArrayList<>();
+        loadMarker();
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -48,6 +61,24 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         mapFragment.getMapAsync(this);
     }
 
+    public void loadMarker(){
+        database.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                tukangKunci.clear();
+                for (DataSnapshot getLat: dataSnapshot.getChildren()){
+                    TukangKunci tukang = getLat.getValue(TukangKunci.class);
+                    tukangKunci.add(tukang);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+    }
 
     /**
      * Manipulates the map once available.
@@ -62,7 +93,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
         //Initialize Google Play Services
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
@@ -76,6 +106,21 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
+
+        for (int i=0; i<tukangKunci.size();i++){
+            TukangKunci tukang = tukangKunci.get(i);
+            createMarker(tukang.getLat(),tukang.getLng());
+//            mMap.addMarker(new MarkerOptions()
+//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+//                    .anchor(0.0f, 1.0f)
+//                    .position(new LatLng(tukang.getLat(),tukang.getLng())));
+        }
+    }
+    protected Marker createMarker(double latitude, double longitude) {
+
+        return mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(latitude, longitude))
+                .anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -107,6 +152,8 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+
+
     @Override
     public void onLocationChanged(Location location) {
 
@@ -117,12 +164,15 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        LatLng p = new LatLng(-7.263495, 112.783336);
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(p);
-        markerOptions.title("PEREMPATAN");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
+//        LatLng p = new LatLng(-7.263495, 112.783336);
+//        MarkerOptions markerOptions = new MarkerOptions();
+//        markerOptions.position(p);
+//        markerOptions.title("PEREMPATAN");
+//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+//        mCurrLocationMarker =
+
+
+
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
