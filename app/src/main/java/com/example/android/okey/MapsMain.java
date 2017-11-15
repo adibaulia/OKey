@@ -42,7 +42,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
     DatabaseReference database;
-    List <TukangKunci> tukangKunci;
+    ArrayList <TukangKunci> tukangKunci;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_maps_main);
         database = FirebaseDatabase.getInstance().getReference();
         tukangKunci = new ArrayList<>();
-        loadMarker();
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -66,15 +65,15 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 tukangKunci.clear();
-                for (DataSnapshot getLat: dataSnapshot.getChildren()){
-                    TukangKunci tukang = getLat.getValue(TukangKunci.class);
+                for (DataSnapshot getLoc: dataSnapshot.getChildren()){
+                    TukangKunci tukang = getLoc.getValue(TukangKunci.class);
                     tukangKunci.add(tukang);
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Toast.makeText(MapsMain.this, "Error", Toast.LENGTH_SHORT).show();
             }
 
         });
@@ -107,20 +106,19 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             mMap.setMyLocationEnabled(true);
         }
 
-        for (int i=0; i<tukangKunci.size();i++){
-            TukangKunci tukang = tukangKunci.get(i);
-            createMarker(tukang.getLat(),tukang.getLng());
-//            mMap.addMarker(new MarkerOptions()
-//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-//                    .anchor(0.0f, 1.0f)
-//                    .position(new LatLng(tukang.getLat(),tukang.getLng())));
+
+        for (double i=0; i<3;i++){
+            Toast.makeText(this, String.valueOf(i), Toast.LENGTH_SHORT).show();
+            double p =-7.268071+(i*3);
+            createMarker(p , 112.787196);
         }
+
     }
     protected Marker createMarker(double latitude, double longitude) {
-
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
-                .anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                .anchor(0.5f, 0.5f)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -164,6 +162,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
 //        LatLng p = new LatLng(-7.263495, 112.783336);
 //        MarkerOptions markerOptions = new MarkerOptions();
 //        markerOptions.position(p);
