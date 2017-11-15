@@ -41,16 +41,16 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    DatabaseReference database;
-    ArrayList <TukangKunci> tukangKunci;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference();
+    ArrayList<TukangKunci> lokasi;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_main);
-        database = FirebaseDatabase.getInstance().getReference();
-        tukangKunci = new ArrayList<>();
-
+        loadMarker();
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
@@ -61,21 +61,21 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void loadMarker(){
-        database.addValueEventListener(new ValueEventListener() {
+        lokasi = new ArrayList<TukangKunci>();
+        myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                tukangKunci.clear();
-                for (DataSnapshot getLoc: dataSnapshot.getChildren()){
-                    TukangKunci tukang = getLoc.getValue(TukangKunci.class);
-                    tukangKunci.add(tukang);
+                lokasi.clear();
+                for(DataSnapshot loc: dataSnapshot.getChildren()){
+                    TukangKunci tukang = loc.getValue(TukangKunci.class);
+                    lokasi.add(tukang);
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(MapsMain.this, "Error", Toast.LENGTH_SHORT).show();
-            }
 
+            }
         });
     }
 
@@ -106,13 +106,9 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             mMap.setMyLocationEnabled(true);
         }
 
-
-        for (double i=0; i<3;i++){
-            Toast.makeText(this, String.valueOf(i), Toast.LENGTH_SHORT).show();
-            double p =-7.268071+(i*3);
-            createMarker(p , 112.787196);
+        for (int i = 0; i<lokasi.size();i++){
+            createMarker(Double.parseDouble(lokasi.get(i).getLat()),Double.parseDouble(lokasi.get(i).getLng()));
         }
-
     }
     protected Marker createMarker(double latitude, double longitude) {
         return mMap.addMarker(new MarkerOptions()

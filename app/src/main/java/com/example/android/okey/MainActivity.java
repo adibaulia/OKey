@@ -1,5 +1,6 @@
 package com.example.android.okey;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -42,21 +43,20 @@ public class MainActivity extends AppCompatActivity {
         tukang.setId(myRef.push().getKey());
         tukang.setLat(latitude.getText().toString().trim());
         tukang.setLng(longitude.getText().toString().trim());
-        tukang.setNama(namaTukang.getText().toString().trim());
+        tukang.setNama(namaTukang.getText().toString());
         tukang.setNo(nomorHp.getText().toString().trim());
         tukang.setSpesifikasi(spesifikasi.getText().toString());
-
-
-
-        namaTukang.setText("");
-        latitude.setText("");
-        longitude.setText("");
-        nomorHp.setText("");
-        spesifikasi.setText("");
-
-
-
-
-        myRef.child(myRef.push().getKey()).setValue(tukang);
+        if(myRef.child(myRef.push().getKey()).setValue(tukang).isComplete()){
+            namaTukang.setText("");
+            latitude.setText("");
+            longitude.setText("");
+            nomorHp.setText("");
+            spesifikasi.setText("");
+            Toast.makeText(this, "Berhasil Menambahkan Tukang Kunci "+namaTukang.getText(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    public void buttonMaps(View v){
+        Intent intent = new Intent(this, MapsMain.class);
+        startActivity(intent);
     }
 }
