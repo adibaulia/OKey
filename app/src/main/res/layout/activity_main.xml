@@ -95,7 +95,6 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
             <Button
-                android:id="@+id/buttonSave"
                 android:layout_weight="1"
                 android:text="Save"
                 android:onClick="buttonSave"
@@ -110,7 +109,7 @@
 </LinearLayout>
             <Button
                 android:text="Get Location"
-                android:onClick="getLocation"
+                android:id="@+id/buttonLocation"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>
