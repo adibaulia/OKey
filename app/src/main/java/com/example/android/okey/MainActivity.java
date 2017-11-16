@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     EditText spesifikasi;
     EditText alamat;
     Button getLoc;
+    ProgressDialog progress;
+    String bestProvider;
+    Criteria criteria;
     LocationManager locationManager;
 
 
@@ -69,21 +72,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             public void onClick(View v) {
 
                 locationManager=(LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
                 // get the last know location from your location manager.
                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, MainActivity.this );
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                criteria = new Criteria();
+                bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+
+                locationManager.requestLocationUpdates(bestProvider, 1000, 0, MainActivity.this );
+                Location location = locationManager.getLastKnownLocation(bestProvider);
                 // now get the lat/lon from the location and do something with it.
-                ProgressDialog progress = new ProgressDialog(MainActivity.this);
+                progress = new ProgressDialog(MainActivity.this);
                 progress.setTitle("Loading");
-                progress.setMessage("Wait while loading...");
-                progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+                progress.setMessage("Mengambil data dari database");
+                progress.setCancelable(false);
                 progress.show();
                 if(location!=null){
-
                     latitude.setText(String.valueOf(location.getLatitude()));
                     longitude.setText(String.valueOf(location.getLongitude()));
                     Geocoder gCoder = new Geocoder(MainActivity.this);
@@ -96,10 +100,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                     }
                     progress.dismiss();
                 }else{
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, MainActivity.this );
+                    locationManager.requestLocationUpdates(bestProvider, 1000, 0, MainActivity.this );
                     Toast.makeText(MainActivity.this, "NULL", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
     }
