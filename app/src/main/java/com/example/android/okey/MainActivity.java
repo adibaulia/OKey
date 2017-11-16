@@ -1,6 +1,7 @@
 package com.example.android.okey;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,13 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
 
 
     EditText namaTukang;
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     EditText longitude;
     EditText nomorHp;
     EditText spesifikasi;
+    EditText alamat;
     Button save;
 
 
@@ -35,10 +38,12 @@ public class MainActivity extends AppCompatActivity {
         longitude = findViewById(R.id.longitude);
         nomorHp = findViewById(R.id.nomorhp);
         spesifikasi = findViewById(R.id.spesifikasi);
+        alamat = findViewById(R.id.alamat);
         namaTukang.setText("");
         latitude.setText("");
         longitude.setText("");
         nomorHp.setText("");
+        alamat.setText("");
         spesifikasi.setText("");
     }
 
@@ -52,14 +57,15 @@ public class MainActivity extends AppCompatActivity {
         String lng=longitude.getText().toString().trim();
         String no=nomorHp.getText().toString().trim();
         String spek=spesifikasi.getText().toString();
+        String alamat1=alamat.getText().toString();
 
-
-        if(Objects.equals(nama, "") || Objects.equals(lat, "") || Objects.equals(lng, "") || Objects.equals(no, "") || (Objects.equals(spek, ""))){
+        if(Objects.equals(alamat, "") || Objects.equals(nama, "") || Objects.equals(lat, "") || Objects.equals(lng, "") || Objects.equals(no, "") || (Objects.equals(spek, ""))){
             namaTukang.setText("");
             latitude.setText("");
             longitude.setText("");
             nomorHp.setText("");
             spesifikasi.setText("");
+            alamat.setText("");
             Toast.makeText(this, "ISI SEMUA FORM YANG ADA", Toast.LENGTH_SHORT).show();
         }else {
             tukang.setId(myRef.push().getKey());
@@ -68,16 +74,19 @@ public class MainActivity extends AppCompatActivity {
             tukang.setNama(nama);
             tukang.setNo(no);
             tukang.setSpesifikasi(spek);
+            tukang.setAlamat(alamat1);
             if (!myRef.child(myRef.push().getKey()).setValue(tukang).isSuccessful()) {
                 Toast.makeText(this, "Berhasil Menambahkan Tukang Kunci " + nama, Toast.LENGTH_SHORT).show();
                 namaTukang.setText("");
                 latitude.setText("");
                 longitude.setText("");
                 nomorHp.setText("");
+                alamat.setText("");
                 spesifikasi.setText("");
             }
         }
     }
+    
     public void buttonMaps(View v){
         Intent intent = new Intent(this, MapsMain.class);
         startActivity(intent);

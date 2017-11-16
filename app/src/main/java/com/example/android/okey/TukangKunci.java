@@ -14,6 +14,7 @@ public class TukangKunci {
     private String lng;
     private String nama;
     private String no;
+    private String alamat;
     private String Spesifikasi;
 
     public String getSpesifikasi() {
@@ -25,6 +26,14 @@ public class TukangKunci {
     }
 
     public TukangKunci() {
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
     }
 
     public String getId() {
