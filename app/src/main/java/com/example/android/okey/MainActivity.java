@@ -1,22 +1,12 @@
 package com.example.android.okey;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -26,13 +16,12 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-
-public class MainActivity extends AppCompatActivity implements LocationListener{
+public class MainActivity extends AppCompatActivity{
 
 
     EditText namaTukang;
@@ -42,10 +31,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     EditText spesifikasi;
     EditText alamat;
     Button getLoc;
-    ProgressDialog progress;
-    String bestProvider;
-    Criteria criteria;
-    LocationManager locationManager;
+    private ArrayList<String> permissionsToRequest;
+    private ArrayList<String> permissionsRejected = new ArrayList<>();
+    private ArrayList<String> permissions = new ArrayList<>();
+    private final static int ALL_PERMISSIONS_RESULT = 101;
+    LocationTrack locationTrack;
 
 
     @Override
@@ -66,46 +56,125 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         alamat.setText("");
         spesifikasi.setText("");
 
+        permissions.add(ACCESS_FINE_LOCATION);
+        permissions.add(ACCESS_COARSE_LOCATION);
+
+        permissionsToRequest = findUnAskedPermissions(permissions);
+        //get the permissions we have asked for before but are not granted..
+        //we will store this in a global list to access later.
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+
+            if (permissionsToRequest.size() > 0)
+                requestPermissions((String[]) permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+        }
 
         getLoc.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
 
-                locationManager=(LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                // get the last know location from your location manager.
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                criteria = new Criteria();
-                bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+                locationTrack = new LocationTrack(MainActivity.this);
 
-                locationManager.requestLocationUpdates(bestProvider, 1000, 0, MainActivity.this );
-                Location location = locationManager.getLastKnownLocation(bestProvider);
-                // now get the lat/lon from the location and do something with it.
-                progress = new ProgressDialog(MainActivity.this);
-                progress.setTitle("Loading");
-                progress.setMessage("Mengambil data dari database");
-                progress.setCancelable(false);
-                progress.show();
-                if(location!=null){
-                    latitude.setText(String.valueOf(location.getLatitude()));
-                    longitude.setText(String.valueOf(location.getLongitude()));
-                    Geocoder gCoder = new Geocoder(MainActivity.this);
-                    List<Address> addresses = null;
-                    try {
-                        addresses = gCoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                        alamat.setText(String.valueOf(addresses.get(0).getAddressLine(0)));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    progress.dismiss();
-                }else{
-                    locationManager.requestLocationUpdates(bestProvider, 1000, 0, MainActivity.this );
-                    Toast.makeText(MainActivity.this, "NULL", Toast.LENGTH_SHORT).show();
+
+                if (locationTrack.canGetLocation()) {
+
+
+                    double longitude = locationTrack.getLongitude();
+                    double latitude = locationTrack.getLatitude();
+
+                    Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
+                } else {
+
+                    locationTrack.showSettingsAlert();
                 }
+
             }
         });
+
     }
+
+
+    private ArrayList findUnAskedPermissions(ArrayList wanted) {
+        ArrayList result = new ArrayList();
+
+        for (Object perm : wanted) {
+            if (!hasPermission(perm)) {
+                result.add(perm);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean hasPermission(Object permission) {
+        if (canMakeSmores()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return (checkSelfPermission((String) permission) == PackageManager.PERMISSION_GRANTED);
+            }
+        }
+        return true;
+    }
+
+    private boolean canMakeSmores() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
+        switch (requestCode) {
+
+            case ALL_PERMISSIONS_RESULT:
+                for (String perms : permissionsToRequest) {
+                    if (!hasPermission(perms)) {
+                        permissionsRejected.add(perms);
+                    }
+                }
+
+                if (permissionsRejected.size() > 0) {
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
+                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
+                                            }
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+
+                }
+
+                break;
+        }
+
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locationTrack.stopListener();
+    }
+
 
     public void buttonSave(View v) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -147,31 +216,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        locationManager.removeUpdates(MainActivity.this);
-
-    }
-    @Override
-    public void onLocationChanged(Location location) {
-        locationManager.removeUpdates(MainActivity.this);
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
 
     public void buttonMaps(View v){
         Intent intent = new Intent(this, MapsMain.class);
