@@ -108,8 +108,14 @@
                 android:layout_height="wrap_content" />
 </LinearLayout>
             <Button
-                android:text="Get Location"
+                android:text="Get Location (NOT ACCURRATE)"
                 android:id="@+id/buttonLocation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:text="Get Address based on LAT LNG"
+                android:onClick="getAddress"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>
