@@ -2,9 +2,12 @@ package com.example.android.okey;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +19,9 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -76,15 +81,26 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View view) {
 
                 locationTrack = new LocationTrack(MainActivity.this);
-
+                ProgressDialog progress = new ProgressDialog(MainActivity.this);
+                progress.setTitle("Loading");
+                progress.setMessage("Mengambil data dari database");
+                progress.setCancelable(false);
+                progress.show();
 
                 if (locationTrack.canGetLocation()) {
 
 
-                    double longitude = locationTrack.getLongitude();
-                    double latitude = locationTrack.getLatitude();
-
-                    Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
+                    latitude.setText(String.valueOf(locationTrack.getLatitude()));
+                    longitude.setText(String.valueOf(locationTrack.getLongitude()));
+                    Geocoder gCoder = new Geocoder(MainActivity.this);
+                    List<Address> addresses = null;
+                    try {
+                        addresses = gCoder.getFromLocation(locationTrack.getLatitude(), locationTrack.getLongitude(), 1);
+                        alamat.setText(String.valueOf(addresses.get(0).getAddressLine(0)));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    progress.dismiss();
                 } else {
 
                     locationTrack.showSettingsAlert();
@@ -213,6 +229,17 @@ public class MainActivity extends AppCompatActivity{
                 alamat.setText("");
                 spesifikasi.setText("");
             }
+        }
+    }
+
+    public void getAddress(View v){
+        Geocoder gCoder = new Geocoder(MainActivity.this);
+        List<Address> addresses = null;
+        try {
+            addresses = gCoder.getFromLocation(Double.parseDouble(latitude.getText().toString().trim()), Double.parseDouble(longitude.getText().toString().trim()), 1);
+            alamat.setText(String.valueOf(addresses.get(0).getAddressLine(0)));
+        } catch (IOException e) {
+            Toast.makeText(this, "mbingungi blok", Toast.LENGTH_SHORT).show();
         }
     }
 
