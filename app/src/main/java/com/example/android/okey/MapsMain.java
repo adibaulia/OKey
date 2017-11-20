@@ -4,11 +4,12 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -29,14 +30,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
+public class MapsMain extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private GoogleMap mMap;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
@@ -44,13 +43,13 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference();
     ArrayList<TukangKunci> lokasi;
-
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_main);
-        loadMarker();
+        loadLokasi();
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
@@ -60,13 +59,13 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         mapFragment.getMapAsync(this);
     }
 
-    public void loadMarker(){
+    public void loadLokasi() {
         lokasi = new ArrayList<TukangKunci>();
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 lokasi.clear();
-                for(DataSnapshot loc: dataSnapshot.getChildren()){
+                for (DataSnapshot loc : dataSnapshot.getChildren()) {
                     TukangKunci tukang = loc.getValue(TukangKunci.class);
                     lokasi.add(tukang);
                 }
@@ -100,20 +99,22 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                 buildGoogleApiClient();
                 mMap.setMyLocationEnabled(true);
             }
-        }
-        else {
+        } else {
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
 
-        for (int i = 0; i<lokasi.size();i++){
-            createMarker(Double.parseDouble(lokasi.get(i).getLat()),Double.parseDouble(lokasi.get(i).getLng()));
+        for (int i = 0; i < lokasi.size(); i++) {
+            createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(), lokasi.get(i).getSpesifikasi());
         }
     }
-    protected Marker createMarker(double latitude, double longitude) {
+
+    protected Marker createMarker(double latitude, double longitude, String name, String spek) {
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
+                .title(name)
+                .snippet(spek)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
     }
 
@@ -146,8 +147,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
-
-
     @Override
     public void onLocationChanged(Location location) {
 
@@ -158,16 +157,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-//        LatLng p = new LatLng(-7.263495, 112.783336);
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        markerOptions.position(p);
-//        markerOptions.title("PEREMPATAN");
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//        mCurrLocationMarker =
-
-
-
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -185,8 +174,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    public boolean checkLocationPermission(){
+    public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {

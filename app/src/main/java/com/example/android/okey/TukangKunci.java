@@ -5,8 +5,6 @@ package com.example.android.okey;
  */
 
 
-import com.google.firebase.database.IgnoreExtraProperties;
-
 public class TukangKunci {
 
     private String id;
@@ -17,15 +15,15 @@ public class TukangKunci {
     private String alamat;
     private String Spesifikasi;
 
+    public TukangKunci() {
+    }
+
     public String getSpesifikasi() {
         return Spesifikasi;
     }
 
     public void setSpesifikasi(String spesifikasi) {
-        Spesifikasi = spesifikasi;
-    }
-
-    public TukangKunci() {
+        this.Spesifikasi = spesifikasi;
     }
 
     public String getAlamat() {

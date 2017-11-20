@@ -23,12 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
 
+    private final static int ALL_PERMISSIONS_RESULT = 101;
     EditText namaTukang;
     EditText latitude;
     EditText longitude;
@@ -36,12 +38,10 @@ public class MainActivity extends AppCompatActivity{
     EditText spesifikasi;
     EditText alamat;
     Button getLoc;
+    LocationTrack locationTrack;
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
-    private final static int ALL_PERMISSIONS_RESULT = 101;
-    LocationTrack locationTrack;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,15 +81,13 @@ public class MainActivity extends AppCompatActivity{
             public void onClick(View view) {
 
                 locationTrack = new LocationTrack(MainActivity.this);
-                ProgressDialog progress = new ProgressDialog(MainActivity.this);
+                ProgressDialog progress = new ProgressDialog(view.getContext());
                 progress.setTitle("Loading");
                 progress.setMessage("Mengambil data dari database");
-                progress.setCancelable(false);
+                progress.setCancelable(true);
                 progress.show();
 
                 if (locationTrack.canGetLocation()) {
-
-
                     latitude.setText(String.valueOf(locationTrack.getLatitude()));
                     longitude.setText(String.valueOf(locationTrack.getLongitude()));
                     Geocoder gCoder = new Geocoder(MainActivity.this);
@@ -100,10 +98,13 @@ public class MainActivity extends AppCompatActivity{
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    progress.dismiss();
-                } else {
 
+                } else {
                     locationTrack.showSettingsAlert();
+                }
+
+                if(latitude.getText()!=null || !Objects.equals(latitude.getText().toString(), "")){
+                    progress.dismiss();
                 }
 
             }
@@ -197,22 +198,22 @@ public class MainActivity extends AppCompatActivity{
         DatabaseReference myRef = database.getReference();
         TukangKunci tukang = new TukangKunci();
 
-        String nama=namaTukang.getText().toString();
-        String lat=latitude.getText().toString().trim();
-        String lng=longitude.getText().toString().trim();
-        String no=nomorHp.getText().toString().trim();
-        String spek=spesifikasi.getText().toString();
-        String alamat1=alamat.getText().toString();
+        String nama = namaTukang.getText().toString();
+        String lat = latitude.getText().toString().trim();
+        String lng = longitude.getText().toString().trim();
+        String no = nomorHp.getText().toString().trim();
+        String spek = spesifikasi.getText().toString();
+        String alamat1 = alamat.getText().toString();
 
-        if(Objects.equals(alamat1, "") || Objects.equals(nama, "") || Objects.equals(lat, "") || Objects.equals(lng, "") || Objects.equals(no, "") || (Objects.equals(spek, ""))){
+        if (Objects.equals(alamat1, "") || Objects.equals(nama, "") || Objects.equals(lat, "") || Objects.equals(lng, "") || Objects.equals(no, "") || (Objects.equals(spek, ""))) {
             namaTukang.setText("");
             latitude.setText("");
             longitude.setText("");
             nomorHp.setText("");
             spesifikasi.setText("");
             alamat.setText("");
-            Toast.makeText(this, "ISI SEMUA FORM YANG ADA", Toast.LENGTH_SHORT).show();
-        }else {
+            Toast.makeText(this, "ISI SEMUA FORM YANG ADA!", Toast.LENGTH_SHORT).show();
+        } else {
             tukang.setId(myRef.push().getKey());
             tukang.setLat(lat);
             tukang.setLng(lng);
@@ -232,19 +233,19 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    public void getAddress(View v){
+    public void getAddress(View v) {
         Geocoder gCoder = new Geocoder(MainActivity.this);
         List<Address> addresses = null;
         try {
             addresses = gCoder.getFromLocation(Double.parseDouble(latitude.getText().toString().trim()), Double.parseDouble(longitude.getText().toString().trim()), 1);
             alamat.setText(String.valueOf(addresses.get(0).getAddressLine(0)));
         } catch (IOException e) {
-            Toast.makeText(this, "mbingungi blok", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Alamat tidak tersedia", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    public void buttonMaps(View v){
+    public void buttonMaps(View v) {
         Intent intent = new Intent(this, MapsMain.class);
         startActivity(intent);
     }

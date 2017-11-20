@@ -1,5 +1,6 @@
 package com.example.android.okey;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -14,7 +15,6 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
-import android.Manifest;
 
 /**
  * Created by Adib Aulia R on 17/11/2017.
@@ -22,26 +22,16 @@ import android.Manifest;
 
 public class LocationTrack extends Service implements LocationListener {
 
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
     private final Context mContext;
-
-
+    protected LocationManager locationManager;
     boolean checkGPS = false;
-
-
     boolean checkNetwork = false;
-
     boolean canGetLocation = false;
-
     Location loc;
     double latitude;
     double longitude;
-
-
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
-
-
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
-    protected LocationManager locationManager;
 
     public LocationTrack(Context mContext) {
         this.mContext = mContext;
