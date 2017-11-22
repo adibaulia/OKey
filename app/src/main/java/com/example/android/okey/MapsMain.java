@@ -1,10 +1,12 @@
 package com.example.android.okey;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -23,16 +25,20 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class MapsMain extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnInfoWindowClickListener,
         LocationListener {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -40,23 +46,44 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback, Go
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference();
+    FirebaseDatabase database;
+    DatabaseReference myRef;
     ArrayList<TukangKunci> lokasi;
+    ProgressDialog progress;
     private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps_main);
+
+        if(savedInstanceState ==  null) {
+            database = FirebaseDatabase.getInstance();
+      //      database.setPersistenceEnabled(true);
+            myRef = database.getReference();
+        }
+        progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Mengambil data dari database");
+        progress.setCancelable(true);
+        progress.show();
+        myRef.keepSynced(true);
         loadLokasi();
+
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run() {
+                progress.dismiss();
+            }
+        }, 1500);
+
+        setContentView(R.layout.activity_maps_main);
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(MapsMain.this);
+
     }
 
     public void loadLokasi() {
@@ -69,6 +96,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback, Go
                     TukangKunci tukang = loc.getValue(TukangKunci.class);
                     lokasi.add(tukang);
                 }
+                //  findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
 
             @Override
@@ -105,12 +133,14 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback, Go
         }
 
         for (int i = 0; i < lokasi.size(); i++) {
-            createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(), lokasi.get(i).getSpesifikasi());
+            createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(),
+                    lokasi.get(i).getSpesifikasi());
         }
+        mMap.setOnInfoWindowClickListener(this);
     }
 
     protected Marker createMarker(double latitude, double longitude, String name, String spek) {
-        return mMap.addMarker(new MarkerOptions()
+       return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(name)
@@ -236,5 +266,11 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback, Go
             // other 'case' lines to check for other permissions this app might request.
             // You can add here other case statements according to your requirement.
         }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Info window clicked",
+                Toast.LENGTH_SHORT).show();
     }
 }

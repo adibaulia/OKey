@@ -162,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
+                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]),
+                                                        ALL_PERMISSIONS_RESULT);
                                             }
                                         }
                                     });
@@ -237,7 +238,8 @@ public class MainActivity extends AppCompatActivity {
         Geocoder gCoder = new Geocoder(MainActivity.this);
         List<Address> addresses = null;
         try {
-            addresses = gCoder.getFromLocation(Double.parseDouble(latitude.getText().toString().trim()), Double.parseDouble(longitude.getText().toString().trim()), 1);
+            addresses = gCoder.getFromLocation(Double.parseDouble(latitude.getText().toString().trim()),
+                    Double.parseDouble(longitude.getText().toString().trim()), 1);
             alamat.setText(String.valueOf(addresses.get(0).getAddressLine(0)));
         } catch (IOException e) {
             Toast.makeText(this, "Alamat tidak tersedia", Toast.LENGTH_SHORT).show();
