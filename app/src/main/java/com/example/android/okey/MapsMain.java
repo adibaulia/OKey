@@ -46,8 +46,8 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    FirebaseDatabase database;
-    DatabaseReference myRef;
+    FirebaseDatabase database= FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference();
     ArrayList<TukangKunci> lokasi;
     ProgressDialog progress;
     private GoogleMap mMap;
@@ -55,12 +55,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if(savedInstanceState ==  null) {
-            database = FirebaseDatabase.getInstance();
-      //      database.setPersistenceEnabled(true);
-            myRef = database.getReference();
-        }
         progress = new ProgressDialog(this);
         progress.setTitle("Loading");
         progress.setMessage("Mengambil data dari database");
