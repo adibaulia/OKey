@@ -2,8 +2,10 @@ package com.example.android.okey;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +40,6 @@ import java.util.ArrayList;
 public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnInfoWindowClickListener,
         LocationListener {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -46,11 +47,12 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    FirebaseDatabase database= FirebaseDatabase.getInstance();
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference();
     ArrayList<TukangKunci> lokasi;
     ProgressDialog progress;
     private GoogleMap mMap;
+    String no;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         myRef.keepSynced(true);
         loadLokasi();
 
-        new Handler().postDelayed(new Runnable(){
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 progress.dismiss();
@@ -128,19 +130,34 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
 
         for (int i = 0; i < lokasi.size(); i++) {
             createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(),
-                    lokasi.get(i).getSpesifikasi());
+                    lokasi.get(i).getSpesifikasi(),lokasi.get(i).getNo());
+
+            no=lokasi.get(i).getNo();
+
         }
-        mMap.setOnInfoWindowClickListener(this);
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
     }
 
-    protected Marker createMarker(double latitude, double longitude, String name, String spek) {
-       return mMap.addMarker(new MarkerOptions()
+    protected Marker createMarker(double latitude, double longitude, String name, String spek, String no) {
+     //   no = no;
+        //Toast.makeText(this, no, Toast.LENGTH_SHORT).show();
+        return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(name)
                 .snippet(spek)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
     }
+
+
+
+
+
+
+
+
+    //Program mulai dari ini kebawah jarang diedit
+
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -262,9 +279,4 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Info window clicked",
-                Toast.LENGTH_SHORT).show();
-    }
 }
