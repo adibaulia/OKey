@@ -16,8 +16,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference();
+    TukangKunci tukang = new TukangKunci();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         nomorHp.setText("");
         alamat.setText("");
         spesifikasi.setText("");
+
+
 
         permissions.add(ACCESS_FINE_LOCATION);
         permissions.add(ACCESS_COARSE_LOCATION);
@@ -195,9 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void buttonSave(View v) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference();
-        TukangKunci tukang = new TukangKunci();
 
         String nama = namaTukang.getText().toString();
         String lat = latitude.getText().toString().trim();
@@ -205,6 +211,18 @@ public class MainActivity extends AppCompatActivity {
         String no = nomorHp.getText().toString().trim();
         String spek = spesifikasi.getText().toString();
         String alamat1 = alamat.getText().toString();
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         if (Objects.equals(alamat1, "") || Objects.equals(nama, "") || Objects.equals(lat, "") || Objects.equals(lng, "") || Objects.equals(no, "") || (Objects.equals(spek, ""))) {
             namaTukang.setText("");
@@ -215,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
             alamat.setText("");
             Toast.makeText(this, "ISI SEMUA FORM YANG ADA!", Toast.LENGTH_SHORT).show();
         } else {
+
             tukang.setId(myRef.push().getKey());
             tukang.setLat(lat);
             tukang.setLng(lng);
@@ -233,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 
     public void getAddress(View v) {
         Geocoder gCoder = new Geocoder(MainActivity.this);

@@ -62,7 +62,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         progress.setMessage("Mengambil data dari database");
         progress.setCancelable(true);
         progress.show();
-        myRef.keepSynced(true);
         loadLokasi();
 
         new Handler().postDelayed(new Runnable() {
@@ -83,6 +82,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void loadLokasi() {
+        myRef.keepSynced(true);
         lokasi = new ArrayList<TukangKunci>();
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -127,26 +127,33 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
-
         for (int i = 0; i < lokasi.size(); i++) {
+
+            System.out.println(i);
             createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(),
                     lokasi.get(i).getSpesifikasi(),lokasi.get(i).getNo());
-
-            no=lokasi.get(i).getNo();
-
         }
+
+
+//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//
+//                return false;
+//            }
+//        });
+
+
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
     }
 
     protected Marker createMarker(double latitude, double longitude, String name, String spek, String no) {
-     //   no = no;
-        //Toast.makeText(this, no, Toast.LENGTH_SHORT).show();
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(name)
                 .snippet(spek)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                .icon(BitmapDescriptorFactory.defaultMarker()));
     }
 
 
