@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final View mWindow;
-    private final  ArrayList<TukangKunci> lokasi= new ArrayList<TukangKunci>();
     private Context mContext;
     private String no;
 
@@ -29,43 +28,34 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         this.mWindow = LayoutInflater.from(mContext).inflate(R.layout.custom_info_window, null);
     }
 
-    private void rendowWindowText(Marker marker, View v, ArrayList<TukangKunci> tukangKunci){
+    private void rendowWindowText(Marker marker, View v){
         String title = marker.getTitle();
-        TextView tvTitle = (TextView) v.findViewById(R.id.title);
+        TextView tvTitle = v.findViewById(R.id.title);
+        TextView tvTitle1 = v.findViewById(R.id.title1);
 
         if(!title.equals("")){
             tvTitle.setText(title);
+            tvTitle1.setText(title);
         }
 
         String snippet = marker.getSnippet();
-        TextView tvSnippet = (TextView) v.findViewById(R.id.snippet);
+        TextView tvSnippet = v.findViewById(R.id.snippet);
 
         if(!snippet.equals("")){
             tvSnippet.setText(snippet);
         }
 
-        Toast.makeText(mContext, no, Toast.LENGTH_SHORT).show();
-
-        Button btCall = (Button) v.findViewById(R.id.call);
-        btCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(mContext, "TEST", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
     }
 
     @Override
     public View getInfoWindow(Marker marker) {
-        rendowWindowText(marker, mWindow,lokasi);
+        rendowWindowText(marker, mWindow);
         return mWindow;
     }
 
     @Override
     public View getInfoContents(Marker marker) {
-        rendowWindowText(marker, mWindow,lokasi);
+        rendowWindowText(marker, mWindow);
         return mWindow;
     }
 }
