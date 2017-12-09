@@ -14,7 +14,7 @@ public class Okey extends Application {
         super.onCreate();
 
 
-       // FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-       // FirebaseDatabase.getInstance().getReference().keepSynced(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().getReference().keepSynced(true);
     }
 }

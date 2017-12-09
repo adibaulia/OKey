@@ -128,23 +128,25 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             mMap.setMyLocationEnabled(true);
         }
         for (int i = 0; i < lokasi.size(); i++) {
-
-            System.out.println(i);
             createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(),
                     lokasi.get(i).getSpesifikasi(),lokasi.get(i).getNo());
+            no = lokasi.get(i).getNo();
         }
 
 
-//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//            @Override
-//            public boolean onMarkerClick(Marker marker) {
-//
-//                return false;
-//            }
-//        });
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
 
 
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
+                return true;
+            }
+        });
+
+//        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
+
+
+
     }
 
     protected Marker createMarker(double latitude, double longitude, String name, String spek, String no) {
@@ -153,7 +155,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                 .anchor(0.5f, 0.5f)
                 .title(name)
                 .snippet(spek)
-                .icon(BitmapDescriptorFactory.defaultMarker()));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
     }
 
 

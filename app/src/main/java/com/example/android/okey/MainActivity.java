@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        locationTrack.stopListener();
+        locationTrack.stopListener();
     }
 
 
