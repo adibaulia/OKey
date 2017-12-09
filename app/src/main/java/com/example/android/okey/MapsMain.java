@@ -68,8 +68,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         progress.setMessage("Mengambil data dari database");
         progress.setCancelable(true);
         progress.show();
-
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -96,11 +94,17 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                 lokasi.clear();
                 for (DataSnapshot loc : dataSnapshot.getChildren()) {
                     TukangKunci tukang = loc.getValue(TukangKunci.class);
-                    createMarker(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng()), tukang.getNama(),
-                            tukang.getSpesifikasi(),tukang.getNo(),tukang.getId());
+//                    createMarker(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng()), tukang.getNama(),
+//                            tukang.getSpesifikasi(),tukang.getNo(),tukang.getId());
+                    Marker m = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng())))
+                            .anchor(0.5f, 0.5f)
+                            .title(tukang.getNama())
+                            .snippet(tukang.getSpesifikasi())
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
+                    m.setTag(tukang);
                     lokasi.add(tukang);
                 }
-                //  findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
 
             @Override
@@ -136,38 +140,7 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             mMap.setMyLocationEnabled(true);
         }
         loadLokasi();
-
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
-//        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-//
-//            @Override
-//            public View getInfoWindow(Marker arg0) {
-//                return null;
-//            }
-//
-//            @Override
-//            public View getInfoContents(Marker marker) {
-//
-//                LinearLayout info = new LinearLayout(MapsMain.this);
-//                info.setOrientation(LinearLayout.VERTICAL);
-//
-//                TextView title = new TextView(MapsMain.this);
-//                title.setTextColor(Color.BLACK);
-//                title.setGravity(Gravity.CENTER);
-//                title.setTypeface(null, Typeface.BOLD);
-//                title.setText(marker.getTitle());
-//
-//                TextView snippet = new TextView(MapsMain.this);
-//                snippet.setTextColor(Color.GRAY);
-//                snippet.setText(marker.getSnippet());
-//
-//                info.addView(title);
-//                info.addView(snippet);
-//
-//                return info;
-//            }
-//        });
-
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no, mLastLocation));
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -180,19 +153,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                 Toast.makeText(MapsMain.this, no, Toast.LENGTH_SHORT).show();
             }
         });
-//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//            @Override
-//            public boolean onMarkerClick(Marker marker) {
-//                //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
-//                System.out.println(marker.getTitle());
-//                return true;
-//            }
-//        });
-
-        // mMap.setOnInfoWindowClickListener();
-
-
-
     }
 
     protected Marker createMarker(double latitude, double longitude, String name, String spek, String no, String id) {
