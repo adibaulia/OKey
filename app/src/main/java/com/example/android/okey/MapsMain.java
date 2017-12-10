@@ -150,22 +150,13 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                         no=lokasi.get(i).getNo();
                     }
                 }
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:"+no));
+                startActivity(intent);
                 Toast.makeText(MapsMain.this, no, Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-    protected Marker createMarker(double latitude, double longitude, String name, String spek, String no, String id) {
-        return mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(latitude, longitude))
-                .anchor(0.5f, 0.5f)
-                .title(name)
-                .snippet(spek)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
-    }
-
-
-
 
 
 
