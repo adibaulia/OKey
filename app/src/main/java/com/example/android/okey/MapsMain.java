@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -12,6 +14,10 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -62,8 +68,6 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         progress.setMessage("Mengambil data dari database");
         progress.setCancelable(true);
         progress.show();
-        loadLokasi();
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -90,9 +94,17 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                 lokasi.clear();
                 for (DataSnapshot loc : dataSnapshot.getChildren()) {
                     TukangKunci tukang = loc.getValue(TukangKunci.class);
+//                    createMarker(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng()), tukang.getNama(),
+//                            tukang.getSpesifikasi(),tukang.getNo(),tukang.getId());
+                    Marker m = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng())))
+                            .anchor(0.5f, 0.5f)
+                            .title(tukang.getNama())
+                            .snippet(tukang.getSpesifikasi())
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
+                    m.setTag(tukang);
                     lokasi.add(tukang);
                 }
-                //  findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
 
             @Override
@@ -127,39 +139,24 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
-        for (int i = 0; i < lokasi.size(); i++) {
-            createMarker(Double.parseDouble(lokasi.get(i).getLat()), Double.parseDouble(lokasi.get(i).getLng()), lokasi.get(i).getNama(),
-                    lokasi.get(i).getSpesifikasi(),lokasi.get(i).getNo());
-            no = lokasi.get(i).getNo();
-        }
-
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        loadLokasi();
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no, mLastLocation));
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-
-
-                return true;
+            public void onInfoWindowClick(Marker marker) {
+                String no=null;
+                for (int i=0; i<lokasi.size();i++){
+                    if(lokasi.get(i).getNama().equals(marker.getTitle())){
+                        no=lokasi.get(i).getNo();
+                    }
+                }
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:"+no));
+                startActivity(intent);
+                Toast.makeText(MapsMain.this, no, Toast.LENGTH_SHORT).show();
             }
         });
-
-//        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no));
-
-
-
     }
-
-    protected Marker createMarker(double latitude, double longitude, String name, String spek, String no) {
-        return mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(latitude, longitude))
-                .anchor(0.5f, 0.5f)
-                .title(name)
-                .snippet(spek)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
-    }
-
-
-
 
 
 
