@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -59,6 +61,8 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     ProgressDialog progress;
     private GoogleMap mMap;
     String no;
+    LatLng latLng;
+    float jarak;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,22 +90,28 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void loadLokasi() {
+
+
+
         myRef.keepSynced(true);
         lokasi = new ArrayList<TukangKunci>();
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 lokasi.clear();
+                int height = 100;
+                int width = 100;
+                BitmapDrawable bitmapdraw=(BitmapDrawable)getResources().getDrawable(R.drawable.locicon);
+                Bitmap b=bitmapdraw.getBitmap();
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
                 for (DataSnapshot loc : dataSnapshot.getChildren()) {
                     TukangKunci tukang = loc.getValue(TukangKunci.class);
-//                    createMarker(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng()), tukang.getNama(),
-//                            tukang.getSpesifikasi(),tukang.getNo(),tukang.getId());
                     Marker m = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(Double.parseDouble(tukang.getLat()), Double.parseDouble(tukang.getLng())))
-                            .anchor(0.5f, 0.5f)
+                           // .anchor(0.5f, 0.5f)
                             .title(tukang.getNama())
                             .snippet(tukang.getSpesifikasi())
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.iconokeysmall)));
+                            .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
                     m.setTag(tukang);
                     lokasi.add(tukang);
                 }
@@ -140,7 +150,9 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
             mMap.setMyLocationEnabled(true);
         }
         loadLokasi();
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no, mLastLocation));
+
+        //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no, latLng));
+
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -150,13 +162,18 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
                         no=lokasi.get(i).getNo();
                     }
                 }
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:"+no));
-                startActivity(intent);
-                Toast.makeText(MapsMain.this, no, Toast.LENGTH_SHORT).show();
+
+                if(no.equals("")||no.equals("-")){
+                    Toast.makeText(MapsMain.this, "Nomor tidak ditemukan dalam database", Toast.LENGTH_SHORT).show();
+                }else {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + no));
+                    startActivity(intent);
+                }
             }
         });
     }
+
 
 
 
@@ -203,7 +220,9 @@ public class MapsMain extends FragmentActivity implements OnMapReadyCallback,
         }
 
         //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsMain.this, no, latLng));
+
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
